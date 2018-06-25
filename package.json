@@ -1,0 +1,18 @@
+{
+  "name": "myio-server",
+  "version": "1.0.0",
+  "description": "server for myio",
+  "repository": "https://github.com/EVERYDAYHERO2000/myui-server",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "mysql": "^2.15.0",
+    "socket.io": "^2.1.1"
+  }
+}
