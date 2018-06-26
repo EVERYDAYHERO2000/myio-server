@@ -1,1 +1,3 @@
 node_modules/
+.ftpsync_settings
+src/config.js
