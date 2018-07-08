@@ -24,14 +24,12 @@ app.post('/api', function (request, response) {
 	if (request.headers.host.indexOf(config.ports.http) + 1) {
 
 		request.on('data', function (chunk) {
-			var data = chunk.toString();
-			var method = request.method;
 			
-			httpRequests(method, data, function(e){
+			httpRequests(request.method, chunk.toString(), function(e){
 				response.header("Access-Control-Allow-Origin", "*");
 				response.header("Access-Control-Allow-Headers", "X-Requested-With");
 				response.json(e);
-				
+				console.log(e);
 			});
 			
 			
@@ -50,12 +48,7 @@ io.on('connection', function (socket) {
 io.emit('some event', {
 	for: 'everyone'
 });
-/*
-http.on('request', function (request, response) {
-		console.log(request.method);
-
-});
-*/
+ 
 http.listen(config.ports.http, function () {
 	console.log('listening on *:' + config.ports.http);
 });
