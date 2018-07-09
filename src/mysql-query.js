@@ -72,27 +72,34 @@ usersDB.login = function (q, callback) {
 	});
 }
 
-//Добавить нового пользователя
+//Регистрация нового пользователя
 usersDB.registration = function (q, callback) {
-	usersDB.findUser(q, function (s) {
-		if (!s.status) {
-			let query = `INSERT INTO ${db.users} (login,email,password,registerDate) VALUES ('${q.login}','${q.email}','${q.pass}','${dateTime().formated}');`;
-			connectToMYSQL(query, function (e) {
-				if (callback) callback({
-					status: (e.affectedRows) ? true : false,
-					msg: (e.affectedRows) ? 'Пользователь добавлен' : 'Пользователь не добавлен'
-				});
+	usersDB.findUser(q, function (findUser__result) {
+		if (!findUser__result.status) {
+			usersDB.createUser(q , function(createUser__result){
+				if (createUser__result.status) {
+					spacesDB.createSpace (q, callback);
+				}
 			});
 		} else {
 			if (callback) callback({
-					status: false,
-					msg: 'Пользователь не добавлен, уже есть пользователь с такими данными'
+				status: false,
+				msg: 'Пользователь не добавлен, уже есть пользователь с такими данными'
 			});
 		}
 	});
 }
 
-usersDB.createUser = usersDB.registration;
+//создать новового пользователя
+usersDB.createUser = function (q, callback) {
+	let query = `INSERT INTO ${db.users} (login,email,password,registerDate) VALUES ('${q.login}','${q.email}','${q.pass}','${dateTime().formated}');`;
+	connectToMYSQL(query, function (e) {
+		if (callback) callback({
+			status: (e.affectedRows) ? true : false,
+			msg: (e.affectedRows) ? 'Пользователь добавлен' : 'Пользователь не добавлен'
+		});
+	});
+});
 
 //Загрузить настройки пользователя
 usersDB.getSettings = function (q, callback) {
@@ -104,11 +111,11 @@ usersDB.getSettings = function (q, callback) {
 		};
 		if (result.status) {
 			result.login = e[0].login,
-			result.email = e[0].password,
-			result.avatar = e[0].avatar,
-			result.firstName = e[0].firstName,
-			result.lastName = e[0].lastName,
-			result.lang = e[0].lang
+				result.email = e[0].password,
+				result.avatar = e[0].avatar,
+				result.firstName = e[0].firstName,
+				result.lastName = e[0].lastName,
+				result.lang = e[0].lang
 		};
 		if (callback) callback(result);
 	});
@@ -129,12 +136,32 @@ usersDB.setSettings = function (q, callback) {
 //
 //
 //
+// пространства
+var spacesDB = {};
+// создать пространство
+spacesDB.createSpace = function (q, callback) {
+	let query = `INSERT INTO ${db.spaces} (name, spaceCreator, creationDate, icon) VALUES ('${q.space}', '${q.userId}', '${q.date}', '${q.icon}');`;
+	connectToMYSQL(query, function (e) {
+		if (callback) callback({
+			status: (e.affectedRows) ? true : false,
+			msg: (e.affectedRows) ? 'Пространство добавленно' : 'Пространство не добавлено'
+		});
+	});
+}
+
+
+//
+//
+//
+//
 // чаты
 var chatsDB = {}
-
-chatsDB.createChat = function(q, callback) {
+// создать чат
+chatsDB.createChat = function (q, callback) {
 	let query = `INSERT INTO ${db.chats}`;
 	connectToMYSQL(query, function (e) {
-		
+		if (callback) callback({
+
+		});
 	});
 }
