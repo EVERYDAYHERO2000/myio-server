@@ -39,6 +39,7 @@ var usersDB = {}
 //Найти пользователя по email
 usersDB.findUser = function (q, callback) {
 	let email = q.email;
+	
 	let query = `SELECT * FROM ${db.users} WHERE email = "${email}";`;
 	connectToMYSQL(query, function (e) {
 		if (callback) callback({
@@ -52,8 +53,10 @@ usersDB.findUser = function (q, callback) {
 usersDB.login = function (q, callback) {
 	let email = q.email;
 	let pass = q.pass;
+	
 	let query = `SELECT * FROM ${db.users} WHERE email = "${email}" AND password = "${pass}";`;
 	connectToMYSQL(query, function (e) {
+		console.log(e);
 		if (callback) callback({
 			status: (e.length) ? true : false,
 			msg: (e.length) ? 'Пользователь найден' : 'Пользователь не найден'
@@ -67,31 +70,47 @@ usersDB.login = function (q, callback) {
 //создание пространства
 //создание чата
 usersDB.registration = function (q, callback) {
-	usersDB.findUser(q, function (findUser__result) {
-		if (!findUser__result.status) {
-			usersDB.createUser(q , function(createUser__result){
-				if (createUser__result.status) {
-					let space = {
-						userId: createUser__result.id,
-						date: dateTime().formated,
-						space: q.space,
-						icon: null
-					}
-					spacesDB.createSpace (space, function(createSpace__result){
-						let chat = {
-							userId: createUser__result.id,
-							name: 'Instruction',
-							icon: null,
-							spacesId: createSpace__result.id,
-							creationDate: dateTime().formated,
-							taskStatus: 'chat',
-							parentId: null,
-							deadlineDate: null				
-						}
-						chatsDB.createChat (chat, callback);
-					});
-				}
-			});
+		usersDB.findUser(q, function (findUser__result) {
+					if (!findUser__result.status) {
+						usersDB.createUser(q, function (createUser__result) {
+							if (createUser__result.status) {
+
+								spacesDB.createSpace({
+									userId: createUser__result.id,
+									date: dateTime().formated,
+									space: q.space,
+									icon: null
+								}, function (createSpace__result) {
+
+									spacesDB.createRole({
+										spaceId: createSpace__result.id,
+										userId: createUser__result.id,
+										role: 'admin'
+									}, function (createRole) {
+
+										chatsDB.createChat({
+											userId: createUser__result.id,
+											name: 'Instruction',
+											icon: null,
+											spacesId: createSpace__result.id,
+											creationDate: dateTime().formated,
+											taskStatus: 'chat',
+											parentId: null,
+											deadlineDate: null
+										}, function (createChat__result) {
+
+											chatsDB.addUser({
+												chatsId: createChat__result.id,
+												usersId: createUser__result.id,
+												chatRole: 'admin',
+												joinDate: dateTime().formated
+											}, callback);
+										});
+									});
+
+								});
+							}
+						});
 		} else {
 			if (callback) callback({
 				status: false,
@@ -107,6 +126,7 @@ usersDB.createUser = function (q, callback) {
 	let email = def(q.email);
 	let pass = def(q.pass);
 	let date = def(dateTime().formated);
+	
 	let query = `INSERT INTO ${db.users} (login,email,password,registerDate) VALUES (${login}, ${email}, ${pass}, ${date});`;
 	connectToMYSQL(query, function (e) {
 		if (callback) callback({
@@ -120,6 +140,7 @@ usersDB.createUser = function (q, callback) {
 //Загрузить настройки пользователя по id
 usersDB.getSettings = function (q, callback) {
 	let id = q.id;
+	
 	let query = `SELECT * FROM ${db.users} WHERE id = "${id}";`;
 	connectToMYSQL(query, function (e) {
 		let result = {
@@ -141,6 +162,7 @@ usersDB.getSettings = function (q, callback) {
 //Редактировать пользователя по id
 usersDB.setSettings = function (q, callback) {
 	let id = q.id;
+	
 	let query = `UPDATE INTO ${db.users} WHERE id = "${id}";`;
 	connectToMYSQL(query, function (e) {
 		if (callback) callback({
@@ -162,12 +184,27 @@ spacesDB.createSpace = function (q, callback) {
 	let space = def(q.space);
 	let date = def(q.date);
 	let icon = def(q.icon);
+	
 	let query = `INSERT INTO ${db.spaces} (name, spaceCreator, creationDate, icon) VALUES (${space}, ${userId}, ${date}, ${icon});`;
 	connectToMYSQL(query, function (e) {
 		if (callback) callback({
 			status: (e.affectedRows) ? true : false,
 			msg: (e.affectedRows) ? 'Пространство добавленно' : 'Пространство не добавлено',
 			id: e.insertId
+		});
+	});
+}
+
+spacesDB.createRole = function (q, callback) {
+	let spaceId = def(q.spaceId);
+	let userId = def(q.userId);
+	let role = def(q.role);
+	
+	let query = `INSERT INTO ${db.spacesRole} (spaceId, userId, role) VALUES ( ${spaceId}, ${userId}, ${role} );`;
+	connectToMYSQL(query, function (e) {
+		if (callback) callback({
+			status: (e.affectedRows) ? true : false,
+			msg: (e.affectedRows) ? 'Роль для пространства добавлена' : 'Роль для пространства не добавлена'
 		});
 	});
 }
@@ -189,6 +226,7 @@ chatsDB.createChat = function (q, callback) {
 	let taskStatus = def(q.taskStatus);
 	let parentId = def(q.parentId);
 	let deadlineDate = def(q.deadlineDate);
+	
 	let query = `INSERT INTO ${db.chats} (name, icon, createrId, spacesId, creationDate, taskStatus, parentId, deadlineDate) VALUES (${name}, ${icon}, ${createrId}, ${spacesId}, ${creationDate}, ${taskStatus}, ${parentId}, ${deadlineDate});`;
 	connectToMYSQL(query, function (e) {
 		if (callback) callback({
@@ -199,6 +237,25 @@ chatsDB.createChat = function (q, callback) {
 	});
 }
 
+//добавить пользователя в чат
+chatsDB.addUser = function(q, callback) {
+	let chatsId = def(q.chatsId);
+	let usersId = def(q.usersId);
+	let chatRole = def(q.chatRole);
+	let joinDate = def(q.joinDate);
+	
+	let query = `INSERT INTO ${db.chatsRooms} (chatsId, usersId, chatRole, joinDate) VALUES ( ${chatsId}, ${usersId}, ${chatRole}, ${joinDate} );`;
+	connectToMYSQL(query, function (e) {
+		if (callback) callback({
+			status: (e.affectedRows) ? true : false,	
+			msg: (e.affectedRows) ? 'Пользователь добавлен в чат' : 'Пользователь не добавлен в чат'
+		});
+	});
+}
+
+
+
+//обертка для переменных в mysql
 function def(v){
 	return (v) ? '"' + v + '"' : 'NULL';
 }
