@@ -36,15 +36,24 @@ module.exports = mysqlQuery;
 //таблица пользователей
 var usersDB = {}
 
-//Найти пользователя по email
+//Найти пользователя 
 usersDB.findUser = function (q, callback) {
-	let email = q.email;
+	let email = q.email || null;
+	let pass = q.pass || null;
+	let login = q.pass || null;
+	let id = q.userId || null;
 	
-	let query = `SELECT * FROM ${db.users} WHERE email = "${email}";`;
+	let queryId = (id) 				? `id = "${id}"` 						: `id`;
+	let queryEmail = (email) 	? `AND email = "${email}"` 	: ``;
+	let queryPass = (pass) 		? `AND pass = "${pass}"` 		: ``;
+	let queryLogin = (login) 	? `AND login = "${login}"` 	: ``;
+	
+	let query = `SELECT * FROM ${db.users} WHERE ${queryId} ${queryEmail} ${queryPass} ${queryLogin};`;
 	connectToMYSQL(query, function (e) {
 		if (callback) callback({
 			status: (e.length) ? true : false,
-			msg: (e.length) ? 'Пользователь найден' : 'Пользователь не найден'
+			msg: (e.length) ? 'Пользователь найден' : 'Пользователь не найден',
+			user: e[0]
 		});
 	});
 }
@@ -54,13 +63,8 @@ usersDB.login = function (q, callback) {
 	let email = q.email;
 	let pass = q.pass;
 	
-	let query = `SELECT * FROM ${db.users} WHERE email = "${email}" AND password = "${pass}";`;
-	connectToMYSQL(query, function (e) {
-		console.log(e);
-		if (callback) callback({
-			status: (e.length) ? true : false,
-			msg: (e.length) ? 'Пользователь найден' : 'Пользователь не найден'
-		});
+	userDB.findUser(q, function(e){
+		////////////
 	});
 }
 
@@ -70,47 +74,47 @@ usersDB.login = function (q, callback) {
 //создание пространства
 //создание чата
 usersDB.registration = function (q, callback) {
-		usersDB.findUser(q, function (findUser__result) {
-					if (!findUser__result.status) {
-						usersDB.createUser(q, function (createUser__result) {
-							if (createUser__result.status) {
+	usersDB.findUser(q, function (findUser__result) {
+		if (!findUser__result.status) {
+			usersDB.createUser(q, function (createUser__result) {
+				if (createUser__result.status) {
 
-								spacesDB.createSpace({
-									userId: createUser__result.id,
-									date: dateTime().formated,
-									space: q.space,
-									icon: null
-								}, function (createSpace__result) {
+					spacesDB.createSpace({
+						userId: createUser__result.id,
+						date: dateTime().formated,
+						space: q.space,
+						icon: null
+					}, function (createSpace__result) {
 
-									spacesDB.createRole({
-										spaceId: createSpace__result.id,
-										userId: createUser__result.id,
-										role: 'admin'
-									}, function (createRole) {
+						spacesDB.createRole({
+							spaceId: createSpace__result.id,
+							userId: createUser__result.id,
+							role: 'admin'
+						}, function (createRole) {
 
-										chatsDB.createChat({
-											userId: createUser__result.id,
-											name: 'Instruction',
-											icon: null,
-											spacesId: createSpace__result.id,
-											creationDate: dateTime().formated,
-											taskStatus: 'chat',
-											parentId: null,
-											deadlineDate: null
-										}, function (createChat__result) {
+							chatsDB.createChat({
+								userId: createUser__result.id,
+								name: 'Instruction',
+								icon: null,
+								spacesId: createSpace__result.id,
+								creationDate: dateTime().formated,
+								taskStatus: 'chat',
+								parentId: null,
+								deadlineDate: null
+							}, function (createChat__result) {
 
-											chatsDB.addUser({
-												chatsId: createChat__result.id,
-												usersId: createUser__result.id,
-												chatRole: 'admin',
-												joinDate: dateTime().formated
-											}, callback);
-										});
-									});
-
-								});
-							}
+								chatsDB.addUser({
+									chatsId: createChat__result.id,
+									usersId: createUser__result.id,
+									chatRole: 'admin',
+									joinDate: dateTime().formated
+								}, callback);
+							});
 						});
+
+					});
+				}
+			});
 		} else {
 			if (callback) callback({
 				status: false,
@@ -195,6 +199,7 @@ spacesDB.createSpace = function (q, callback) {
 	});
 }
 
+//создать роль в пространстве
 spacesDB.createRole = function (q, callback) {
 	let spaceId = def(q.spaceId);
 	let userId = def(q.userId);
@@ -205,6 +210,40 @@ spacesDB.createRole = function (q, callback) {
 		if (callback) callback({
 			status: (e.affectedRows) ? true : false,
 			msg: (e.affectedRows) ? 'Роль для пространства добавлена' : 'Роль для пространства не добавлена'
+		});
+	});
+}
+
+//найти все пространства в которых у пользователя есть роль
+spacesDB.findSpacesRoles = function(q, callback) {
+	let userId = def(q.useId);
+	
+	let query = `SELECT * FROM ${db.spacesRole} WHERE userId = "${id}";`;
+	connectToMYSQL(query, function (e) {
+		if (callback) callback({
+			status: (e.length) ? true : false,
+			msg: (e.length) ? `У пользователя есть роли в ${e.length} пространствах` : 'У пользователя нет ролей в пространствах',
+			spaces : e
+		});
+	});
+}
+
+//загрузить все пространства пользователя
+spacesDB.loadSpaces = function(q, callback) {
+	let spaces = q.spaces;
+	let idStr = (function(){
+		let idArr = []; 
+		for (var i = 0; i < spaces.length; i++){
+			idArr.push(spaces[i].id);
+		}
+		return idArr.join(',').trim();
+	})();
+	let query = `SELECT * FROM ${db.spaces} WHERE id IN (${idStr});`;
+	connectToMYSQL(query, function (e) {
+		if (callback) callback({
+			status: (e.length) ? true : false,
+			msg: (e.length) ? `Загружено ${e.length} пространств` : 'Не загруженно пространств',
+			spaces : e
 		});
 	});
 }
