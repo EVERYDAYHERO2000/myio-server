@@ -285,17 +285,18 @@ usersDB.getSettings = function (q, callback) {
 	
 	let query = `SELECT * FROM ${db.users} WHERE id = "${id}";`;
 	connectToMYSQL(query, function (e) {
+		let user = e[0];
 		let result = {
 			status: (e.length) ? true : false,
 			msg: (e.length) ? `Данные пользователя id: ${id} загружены` : `Пользователь id: ${id} не найден`
 		};
 		if (result.status) {
-			result.login = e[0].login,
-			result.email = e[0].password,
-			result.avatar = e[0].avatar,
-			result.firstName = e[0].firstName,
-			result.lastName = e[0].lastName,
-			result.lang = e[0].lang
+			result.login = user.login,
+			result.email = user.password,
+			result.avatar = user.avatar,
+			result.firstName = user.firstName,
+			result.lastName = user.lastName,
+			result.lang = user.lang
 		};
 		if (callback) callback(result);
 	});
@@ -378,7 +379,7 @@ spacesDB.loadSpaces = function(q, callback) {
 	connectToMYSQL(query, function (e) {
 		if (callback) callback({
 			status: (e.length) ? true : false,
-			msg: (e.length) ? `Загружено ${e.length} пространств` : 'Не загруженно пространств',
+			msg: (e.length) ? `Загружено ${e.length} пространств` : `Не загруженно пространств`,
 			spaces : e
 		});
 	});
@@ -401,7 +402,7 @@ chatsDB.loadChatsByUser = function (q, callback) {
 	connectToMYSQL(query, function (e) {
 		if (callback) callback({
 			status: (e.length) ? true : false,
-			msg: (e.length) ? `Найдено ${e.length} чатов` : 'Не найдено чатов',
+			msg: (e.length) ? `Найдено ${e.length} чатов` : `Не найдено чатов`,
 			chatsRooms : e
 		});
 	});
@@ -417,7 +418,7 @@ chatsDB.getChatsRoomsById = function (q, callback){
 	connectToMYSQL(query, function (e) {
 		if (callback) callback({
 			status: (e.length) ? true : false,
-			msg: (e.length) ? `Найдено ${e.length} чатов` : 'Не найдено чатов',
+			msg: (e.length) ? `Найдено ${e.length} чатов` : `Не найдено чатов`,
 			chatsRooms : e
 		});
 	});
