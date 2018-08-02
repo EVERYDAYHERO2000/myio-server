@@ -5,16 +5,21 @@ var db = C.db;
 
 var mysqlQuery = function (e, q, callback) {
 	switch (e) {
-		case 'findUser':
-			usersDB.findUser(q, callback);
-			break;
 
 		case 'login':
-			usersDB.login(q, callback);
+			usersDB.login({
+				login: q.login,
+				pass: q.pass
+			}, callback);
 			break;
 
 		case 'registration':
-			usersDB.registration(q, callback);
+			usersDB.registration({
+				login: q.login,
+				email: q.email,
+				pass: q.pass,
+				space: q.space
+			}, callback);
 			break;
 
 		case 'getSettings':
@@ -23,6 +28,14 @@ var mysqlQuery = function (e, q, callback) {
 
 		case 'setSettings':
 			usersDB.setSettings(q, callback);
+			break;
+		
+		case 'loadMessages':
+			messagesDB.loadMessages({
+				email: q.email,
+				pass: q.pass,
+				chatsId: (typeof q.chatsId == 'string') ? q.chatsId.split(',') : q.chatsId
+			}, callback);
 			break;
 	}
 }
@@ -192,6 +205,7 @@ usersDB.registration = function (q, callback) {
 	let login = q.login;
 	let email = q.email;
 	let pass = q.pass;
+	let space = q.space;
 	
 	//
 	//есть ли пользователь
@@ -217,7 +231,7 @@ usersDB.registration = function (q, callback) {
 				spacesDB.createSpace({
 					userId: createUser__result.id,
 					date: dateTime().formated,
-					space: q.space,
+					space: space,
 					icon: null
 				}, function (createSpace__result) {
 
@@ -516,6 +530,28 @@ tagsDB.loadTags = function(q, callback){
 		});
 	});
 	
+}
+
+//
+//
+//
+//
+// сообщения
+var messagesDB = {};
+
+//загрузить сообщения
+messagesDB.loadMessages = function(q, callback){
+	let chatsId = q.chatsId; // [1,2,3] — id
+	let idStr = arrayToString(chatsId); // "1","2","3"
+	
+	let query = `SELECT * FROM ${db.messages} WHERE chatsId IN (${idStr})`;
+	connectToMYSQL(query, function (e) {
+		if (callback) callback({
+			status: (e.affectedRows) ? true : false,	
+			msg: (e.affectedRows) ? 'Сообщения загружены' : 'Сообщения не загружены',
+			messages: e
+		});
+	});
 }
 
 //обертка для переменных в mysql
