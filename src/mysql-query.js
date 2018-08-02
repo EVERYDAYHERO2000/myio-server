@@ -162,7 +162,8 @@ usersDB.login = function (q, callback) {
 											msg: `Пользователь вошёл, данные успешно загружены`,
 											data: {
 												user: findUser__result.user,
-												spaces: findSpacesRoles__result.spaces,
+												spaceRoles: findSpacesRoles__result.spaces,
+												spaces: loadSpaces__result.spaces,
 												chatsRooms: loadChatsByUser__result.chatsRooms,
 												chats: loadChats__result.chats,
 												tags: loadTags__result.tags,
