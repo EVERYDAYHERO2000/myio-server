@@ -21,6 +21,23 @@ var mysqlQuery = function (e, q, callback) {
 				space: q.space
 			}, callback);
 			break;
+			
+		case 'createNewChat':
+			chatsDB.createNewChat({
+				email: q.email,
+				pass: q.pass,
+				author: q.author,
+				name: q.name,
+				description: q.description,
+				date: q.date,
+				chatType: q.chatType,
+				space: q.space,
+				userList: (typeof q.userList == 'string') ? q.userList.split(',') : q.userList
+			}, callback);
+			break;
+			
+		case 'addNewUser':
+			break;
 
 		case 'getSettings':
 			userDB.getSettings(q, callback);
@@ -343,7 +360,7 @@ usersDB.setActiveChat = function (q, callback) {
 	let userId = def(q.userId);
 	let chatId = def(q.chatId);
 	
-	console.log(userId, chatId);
+	
 	
 	let query = `UPDATE ${db.users} SET activeChatId = ${chatId} WHERE id = ${userId}`;
 	connectToMYSQL(query, function (e) {
@@ -495,6 +512,42 @@ chatsDB.loadChatTags = function (q, callback) {
 	});
 }
 
+//создать новый чат, добавить роли
+chatsDB.createNewChat = function (q, callback){
+	let email = q.email;
+	let	pass = q.pass;
+	let createrId = q.author;
+	let name = q.name;
+	let description = q.description;
+	let date = q.date;
+	let space = q.space;		
+	let userList = arrayToString(q.userList);
+	let chatType = q.chatType;
+	
+	
+	//
+	//создать чат
+	chatsDB.createChat({
+		userId: createrId,
+		name: name,
+		icon: null,
+		spacesId: space,
+		creationDate: dateTime().formated,
+		taskStatus: chatType,
+		parentId: null,
+		deadlineDate: dateTime(date).formated
+	},function(createChat__result){
+		
+		//
+		//добавить пользователя в чат
+		chatsDB.addUser({
+			chatsId: createChat__result.id,
+			usersId: createrId,
+			chatRole: 'admin',
+			joinDate: dateTime().formated
+		}, callback );
+	});
+};
 
 // создать чат
 chatsDB.createChat = function (q, callback) {
@@ -506,8 +559,11 @@ chatsDB.createChat = function (q, callback) {
 	let taskStatus = def(q.taskStatus);
 	let parentId = def(q.parentId);
 	let deadlineDate = def(q.deadlineDate);
-	
+
 	let query = `INSERT INTO ${db.chats} (name, icon, createrId, spacesId, creationDate, taskStatus, parentId, deadlineDate) VALUES (${name}, ${icon}, ${createrId}, ${spacesId}, ${creationDate}, ${taskStatus}, ${parentId}, ${deadlineDate});`;
+	
+	
+	
 	connectToMYSQL(query, function (e) {
 		if (callback) callback({
 			status: (e.affectedRows) ? true : false,	
