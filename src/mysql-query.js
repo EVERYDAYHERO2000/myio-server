@@ -264,6 +264,14 @@ usersDB.registration = function (q, callback) {
 								chatRole: 'admin',
 								joinDate: dateTime().formated
 							}, callback);
+							
+							//
+							//установить созданный чат активным
+							usersDB.setActiveChat({
+								userId: createUser__result.id, 
+								chatId: createChat__result.id
+							});
+							
 						});
 					});
 				});
@@ -321,7 +329,23 @@ usersDB.getSettings = function (q, callback) {
 usersDB.setSettings = function (q, callback) {
 	let id = q.id;
 	
-	let query = `UPDATE INTO ${db.users} WHERE id = "${id}";`;
+	let query = `UPDATE ${db.users} WHERE id = "${id}";`;
+	connectToMYSQL(query, function (e) {
+		if (callback) callback({
+			status: (e.affectedRows) ? true : false,
+			msg: (e.affectedRows) ? 'Данные изменены' : ''
+		});
+	});
+}
+
+//задать активный чат для пользователя
+usersDB.setActiveChat = function (q, callback) {
+	let userId = def(q.userId);
+	let chatId = def(q.chatId);
+	
+	console.log(userId, chatId);
+	
+	let query = `UPDATE ${db.users} SET activeChatId = ${chatId} WHERE id = ${userId}`;
 	connectToMYSQL(query, function (e) {
 		if (callback) callback({
 			status: (e.affectedRows) ? true : false,
@@ -444,7 +468,7 @@ chatsDB.loadChats = function (q, callback) {
 	let chatsId = q.chatsId; // [1,2,3] — id
 	let idStr = arrayToString(chatsId); // "1","2","3"
 	
-	let query = `SELECT * FROM ${db.chats} WHERE id IN (${idStr})`;
+	let query = `SELECT * FROM ${db.chats} WHERE id IN (${idStr}) AND isDeleted = 0`;
 	
 	connectToMYSQL(query, function (e) {
 		if (callback) callback({
