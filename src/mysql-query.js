@@ -1,16 +1,16 @@
-var C = require('../src/config');
-var dateTime = require('../src/date-time.js');
-var mysql = require('mysql');
-var db = C.db;
-var F = require('../src/mysql-function');
+const C = require('../src/config');
+const dateTime = require('../src/date-time.js');
+const mysql = require('mysql');
+const db = C.db;
+const F = require('../src/mysql-function');
 
-var messagesDB = require('../src/mysql__messagesDB');
-var tagsDB = require('../src/mysql__tagsDB');
-var chatsDB = require('../src/mysql__chatsDB');
-var spacesDB = require('../src/mysql__spacesDB');
-var usersDB = require('../src/mysql__usersDB');
+const messagesDB = require('../src/mysql__messagesDB');
+const tagsDB = require('../src/mysql__tagsDB');
+const chatsDB = require('../src/mysql__chatsDB');
+const spacesDB = require('../src/mysql__spacesDB');
+const usersDB = require('../src/mysql__usersDB');
 
-var mysqlQuery = function (e, q, callback) {
+const mysqlQuery = function (e, q, callback) {
 	switch (e) {
 
 		case 'login':
@@ -140,7 +140,7 @@ function login (q, callback) {
 										
 										callback({
 											status: true,
-											msg: `Пользователь вошёл, данные успешно загружены`,
+											msg: `Пользователь ${selectUser__result.user.email} вошёл, данные успешно загружены`,
 											data: {
 												user: selectUser__result.user,
 												spaceRoles: selectSpacesByUserId__result.spaces,
@@ -151,7 +151,6 @@ function login (q, callback) {
 												userList: selectUsersById__result.users
 											}
 										});
-										
 									});
 								});
 							});
@@ -160,7 +159,6 @@ function login (q, callback) {
 				});
 			});
 		});
-		////////////
 	});
 }
 
@@ -255,6 +253,8 @@ function registration (q, callback) {
 
 
 //создать новый чат, добавить роли
+//создать чат
+//добавить пользователя в чат
 function createNewChat (q, callback){
 	let email = q.email;
 	let	pass = q.pass;

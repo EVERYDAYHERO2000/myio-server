@@ -1,21 +1,22 @@
-var C = require('../src/config');
-var F = require('../src/mysql-function');
-var dateTime = require('../src/date-time.js');
-var db = C.db;
+const C = require('../src/config');
+const Q = require('../src/mysql-query-string');
+const F = require('../src/mysql-function');
+const db = C.db;
 
 //
 //
 //
 //
 // теги
-var tagsDB = {};
+const tagsDB = {};
 
 //загрузить все теги теги пространства
 tagsDB.selectTagsBySpaceId = function(q, callback){
 	let spaces = q.spaces; // [1,2,3] — id
 	let idStr = F.arrayToString(spaces); // "1","2","3"
 	
-	let query = `SELECT * FROM ${db.tags} WHERE spacesId IN (${idStr})`;
+	//let query = `SELECT * FROM ${db.tags} WHERE spacesId IN (${idStr})`;
+	let query = Q().SELECT('*').FROM(db.tags).WHERE().IN({spacesId : idStr}).end();
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
 			status: (e.affectedRows) ? true : false,	

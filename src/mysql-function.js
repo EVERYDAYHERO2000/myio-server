@@ -1,7 +1,7 @@
-var C = require('../src/config');
-var mysql = require('mysql');
+const C = require('../src/config');
+const mysql = require('mysql');
 
-var func = {};
+const func = {};
 
 //обертка для переменных в mysql
 //null => NULL   1234 => "1234"

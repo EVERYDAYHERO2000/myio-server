@@ -1,7 +1,5 @@
 "use strict";
 
-
-
 const getDateTime = function (date) {
 	date = date || new Date();
 	date = (date instanceof Date) ? date : new Date( date.replace(/-/g, '/') );

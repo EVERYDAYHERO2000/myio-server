@@ -1,8 +1,8 @@
-var C = require('../src/config');
-var F = require('../src/mysql-function');
-var dateTime = require('../src/date-time.js');
-var db = C.db;
+const C = require('../src/config');
+const Q = require('../src/mysql-query-string');
+const F = require('../src/mysql-function');
+const db = C.db;
 
-var filesDB = {};
+const filesDB = {};
 
 module.exports = filesDB;

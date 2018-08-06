@@ -1,14 +1,14 @@
-var C = require('../src/config');
-var F = require('../src/mysql-function');
-var dateTime = require('../src/date-time.js');
-var db = C.db;
+const C = require('../src/config');
+const Q = require('../src/mysql-query-string');
+const F = require('../src/mysql-function');
+const db = C.db;
 
 //
 //
 //
 //
 // пространства
-var spacesDB = {};
+const spacesDB = {};
 
 // создать пространство
 spacesDB.insertNewSpace = function (q, callback) {
@@ -17,12 +17,18 @@ spacesDB.insertNewSpace = function (q, callback) {
 	let date = F.def(q.date);
 	let icon = F.def(q.icon);
 	
-	let query = `INSERT INTO ${db.spaces} (name, spaceCreator, creationDate, icon) VALUES (${space}, ${userId}, ${date}, ${icon});`;
+	//let query = `INSERT INTO ${db.spaces} (name, spaceCreator, creationDate, icon) VALUES (${space}, ${userId}, ${date}, ${icon});`;
+	let query = Q().INSERT(db.spaces).VALUES({
+		name : space,
+		spaceCreator : userId,
+		creationDate : date,
+		icon : icon
+	}).end();
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
 			status: (e.affectedRows) ? true : false,
-			msg: (e.affectedRows) ? 'Пространство добавленно' : 'Пространство не добавлено',
+			msg: (e.affectedRows) ? `Пространство "${space}" добавленно` : 'Пространство не добавлено',
 			id: e.insertId
 		});
 	});
@@ -34,12 +40,17 @@ spacesDB.insertRoleInToSpace = function (q, callback) {
 	let userId = F.def(q.userId);
 	let role = F.def(q.role);
 	
-	let query = `INSERT INTO ${db.spacesRole} (spaceId, userId, role) VALUES ( ${spaceId}, ${userId}, ${role} );`;
+	//let query = `INSERT INTO ${db.spacesRole} (spaceId, userId, role) VALUES ( ${spaceId}, ${userId}, ${role} );`;
+	let query = Q().INSERT(db.spacesRole).VALUES({
+		spaceId : spaceId,
+		userId : userId,
+		role : role
+	}).end();
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
 			status: (e.affectedRows) ? true : false,
-			msg: (e.affectedRows) ? 'Роль для пространства добавлена' : 'Роль для пространства не добавлена'
+			msg: (e.affectedRows) ? `Роль пользователя id=${userId} для пространства добавлена` : 'Роль для пространства не добавлена'
 		});
 	});
 }
@@ -48,7 +59,8 @@ spacesDB.insertRoleInToSpace = function (q, callback) {
 spacesDB.selectSpacesByUserId = function(q, callback) {
 	let userId = F.def(q.useId);
 	
-	let query = `SELECT * FROM ${db.spacesRole} WHERE userId = ${userId};`;
+	//let query = `SELECT * FROM ${db.spacesRole} WHERE userId = ${userId};`;
+	let query = Q().SELECT('*').FROM(db.spacesRole).WHERE().even({userId : userId}).end();
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
@@ -64,7 +76,8 @@ spacesDB.selectSpacesById = function(q, callback) {
 	let spaces = q.spaces;
 	let idStr = F.arrayToString(spaces);
 	
-	let query = `SELECT * FROM ${db.spaces} WHERE id IN (${idStr});`;
+	//let query = `SELECT * FROM ${db.spaces} WHERE id IN (${idStr});`;
+	let query = Q().SELECT('*').FROM(db.spaces).WHERE().IN({id : idStr}).end();
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({

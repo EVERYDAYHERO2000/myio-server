@@ -1,10 +1,10 @@
-var config = require('./src/config');
-var app = require('express')();
-var url = require('url');
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
-var bodyParser = require('body-parser');
-var httpRequests = require('./src/http-requests.js');
+const config = require('./src/config');
+const app = require('express')();
+const url = require('url');
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
+const bodyParser = require('body-parser');
+const httpRequests = require('./src/http-requests.js');
 
 
 

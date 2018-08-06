@@ -1,7 +1,7 @@
-var querystring = require('querystring');
-var mysqlQuery = require('../src/mysql-query.js');
+const querystring = require('querystring');
+const mysqlQuery = require('../src/mysql-query.js');
 
-var requests = function (method, data, callback) {
+const requests = function (method, data, callback) {
 	let queryData = querystring.parse(data);
 
 	if (method === 'POST') {	

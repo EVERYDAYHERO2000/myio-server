@@ -1,14 +1,15 @@
-var C = require('../src/config');
-var F = require('../src/mysql-function');
-var dateTime = require('../src/date-time.js');
-var db = C.db;
+const C = require('../src/config');
+const F = require('../src/mysql-function');
+const Q = require('../src/mysql-query-string');
+const dateTime = require('../src/date-time.js');
+const db = C.db;
 
 //
 //
 //
 //
 //таблица пользователей
-var usersDB = {};
+const usersDB = {};
 
 //Найти пользователя 
 usersDB.selectUser = function (q, callback) {
@@ -24,7 +25,8 @@ usersDB.selectUser = function (q, callback) {
 		(login) ? `login = "${login}"` 	 : ``
 	]);
 	
-	let query = `SELECT * FROM ${db.users} WHERE ${queryValues};`;
+	//let query = `SELECT * FROM ${db.users} WHERE ${queryValues};`;
+	let query = Q().SELECT('*').FROM(db.users).WHERE().raw(queryValues).end(); 
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
@@ -40,7 +42,8 @@ usersDB.selectUsersById = function (q, callback) {
 	let userList = q.userList;
 	let idStr = F.arrayToString(userList);
 	
-	let query = `SELECT * FROM ${db.users} WHERE id IN (${idStr})`;
+	//let query = `SELECT * FROM ${db.users} WHERE id IN (${idStr})`;
+	let query = Q().SELECT('*').FROM(db.users).WHERE().IN({id : idStr}).end();
 	
 	F.connectToMYSQL(query, function (e) {
 		
@@ -63,7 +66,8 @@ usersDB.updateActiveChat = function (q, callback) {
 	let userId = F.def(q.userId);
 	let chatId = F.def(q.chatId);
 	
-	let query = `UPDATE ${db.users} SET activeChatId = ${chatId} WHERE id = ${userId}`;
+	//let query = `UPDATE ${db.users} SET activeChatId = ${chatId} WHERE id = ${userId}`;
+	let query = Q().UPDATE(db.users).SET({activeChatId : chatId}).WHERE().even({id : userId});
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
@@ -80,7 +84,14 @@ usersDB.insertNewUser = function (q, callback) {
 	let pass = F.def(q.pass);
 	let date = F.def(dateTime().formated);
 	
-	let query = `INSERT INTO ${db.users} (login,email,password,registerDate) VALUES (${login}, ${email}, ${pass}, ${date});`;
+	//let query = `INSERT INTO ${db.users} (login,email,password,registerDate) VALUES (${login}, ${email}, ${pass}, ${date});`;
+	let query = Q().INSERT(db.users).VALUES({
+		login : login,
+		email : email,
+		password : pass,
+		registerDate : date
+	}).end();
+	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
 			status: (e.affectedRows) ? true : false,
@@ -94,7 +105,8 @@ usersDB.insertNewUser = function (q, callback) {
 usersDB.selectSettingsById = function (q, callback) {
 	let id = q.id;
 	
-	let query = `SELECT * FROM ${db.users} WHERE id = "${id}";`;
+	//let query = `SELECT * FROM ${db.users} WHERE id = "${id}";`;
+	let query = Q().SELECT('*').FROM(db.users).WHERE().even({id : id}).end();
 	F.connectToMYSQL(query, function (e) {
 		let user = e[0];
 		let result = {
