@@ -12,17 +12,14 @@ const spacesDB = {};
 
 // создать пространство
 spacesDB.insertNewSpace = function (q, callback) {
-	let userId = F.def(q.userId);
-	let space = F.def(q.space);
-	let date = F.def(q.date);
-	let icon = F.def(q.icon);
 	
-	//let query = `INSERT INTO ${db.spaces} (name, spaceCreator, creationDate, icon) VALUES (${space}, ${userId}, ${date}, ${icon});`;
-	let query = Q().INSERT(db.spaces).VALUES({
-		name : space,
-		spaceCreator : userId,
-		creationDate : date,
-		icon : icon
+	let query = Q()
+	.INSERT(db.spaces)
+	.VALUES({
+		name : q.space,
+		spaceCreator : q.userId,
+		creationDate : q.date,
+		icon : q.icon
 	}).end();
 	
 	F.connectToMYSQL(query, function (e) {
@@ -36,15 +33,13 @@ spacesDB.insertNewSpace = function (q, callback) {
 
 //создать роль в пространстве
 spacesDB.insertRoleInToSpace = function (q, callback) {
-	let spaceId = F.def(q.spaceId);
-	let userId = F.def(q.userId);
-	let role = F.def(q.role);
 	
-	//let query = `INSERT INTO ${db.spacesRole} (spaceId, userId, role) VALUES ( ${spaceId}, ${userId}, ${role} );`;
-	let query = Q().INSERT(db.spacesRole).VALUES({
-		spaceId : spaceId,
-		userId : userId,
-		role : role
+	let query = Q()
+	.INSERT(db.spacesRole)
+	.VALUES({
+		spaceId : q.spaceId,
+		userId : q.userId,
+		role : q.role
 	}).end();
 	
 	F.connectToMYSQL(query, function (e) {
@@ -57,10 +52,14 @@ spacesDB.insertRoleInToSpace = function (q, callback) {
 
 //найти все пространства в которых у пользователя есть роль
 spacesDB.selectSpacesByUserId = function(q, callback) {
-	let userId = F.def(q.useId);
 	
-	//let query = `SELECT * FROM ${db.spacesRole} WHERE userId = ${userId};`;
-	let query = Q().SELECT('*').FROM(db.spacesRole).WHERE().even({userId : userId}).end();
+	let query = Q()
+	.SELECT('*')
+	.FROM(db.spacesRole)
+	.WHERE()
+	.even({
+		userId : q.useId
+	}).end();
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
@@ -73,11 +72,14 @@ spacesDB.selectSpacesByUserId = function(q, callback) {
 
 //загрузить все пространства пользователя
 spacesDB.selectSpacesById = function(q, callback) {
-	let spaces = q.spaces;
-	let idStr = F.arrayToString(spaces);
 	
-	//let query = `SELECT * FROM ${db.spaces} WHERE id IN (${idStr});`;
-	let query = Q().SELECT('*').FROM(db.spaces).WHERE().IN({id : idStr}).end();
+	let query = Q()
+	.SELECT('*')
+	.FROM(db.spaces)
+	.WHERE()
+	.IN({
+		id : q.spaces
+	}).end();
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({

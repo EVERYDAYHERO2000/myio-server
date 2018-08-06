@@ -6,15 +6,16 @@ const query = function(){
 	this.q = '';
 	
 	//SELECT [*]
-	this.SELECT = function(param){
-		__this.q = __this.q + 'SELECT ' + param + ' ';
+	this.SELECT = function(string){
+		string = string || '*';
+		__this.q = __this.q + 'SELECT ' + string + ' ';
 		return __this;
 	}
 	this.select = this.SELECT;
 	
 	//FROM [table]
-	this.FROM = function(param){
-		__this.q = __this.q + 'FROM ' + param + ' ';
+	this.FROM = function(string){
+		__this.q = __this.q + 'FROM ' + string + ' ';
 		return __this;
 	}
 	this.from = this.FROM;
@@ -27,36 +28,36 @@ const query = function(){
 	this.where = this.WHERE;
 	
 	//[key] IN [value] 
-	this.IN = function(param){
-		for (var prop in param){
+	this.IN = function(obj){
+		for (var key in obj){
 			break;
 		}
-		__this.q = __this.q + prop + ' IN (' + param[prop] + ') ';
+		__this.q = __this.q + key + ' IN (' + F.arrayToString(obj[key]) + ') ';
 		return __this;
 	}
 	this.in = this.IN;
 	
 	//AND
-	this.AND = function(param){
+	this.AND = function(){
 		__this.q = __this.q + 'AND '; 
 		return __this;
 	}
 	this.and = this.AND;
 	
 	//INSERT INTO [table]
-	this.INSERT = function(param){
-		__this.q = __this.q + 'INSERT INTO ' + param + ' ';
+	this.INSERT = function(string){
+		__this.q = __this.q + 'INSERT INTO ' + string + ' ';
 		return __this;
 	}
 	this.insert = this.INSERT;
 	
 	//([keys]) VALUES ([values])
-	this.VALUES = function(param){
+	this.VALUES = function(obj){
 		let keys = [];
 		let values = [];
-		for (var prop in param){
-			keys.push(prop);
-			values.push(param[prop]);
+		for (var key in obj){
+			keys.push(key);
+			values.push( F.def(obj[key]) );
 		}
 		
 		__this.q = __this.q + '(' + keys.join() + ') VALUES (' + values.join() + ') ';
@@ -65,27 +66,27 @@ const query = function(){
 	this.values = this.VALUES;
 	
 	//UPDATE [table]
-	this.UPDATE = function(param){
-		__this.q = __this.q + 'UPDATE ' + param + ' ';
+	this.UPDATE = function(string){
+		__this.q = __this.q + 'UPDATE ' + string + ' ';
 		return __this;
 	}
 	this.update = this.UPDATE;
 	
 	//SET [key] = [value]
-	this.SET = function(param){
-		for (var prop in param){
+	this.SET = function(obj){
+		for (var key in obj){
 			break;
 		}
-		__this.q = __this.q + 'SET ' + prop + ' = ' + param[prop] + ' ';
+		__this.q = __this.q + 'SET ' + key + ' = ' + F.def(obj[key]) + ' ';
 		return __this;
 	}
 	this.set = this.SET;
 	
-	this.even = function(param){
-		for (var prop in param){
+	this.even = function(obj){
+		for (var key in obj){
 			break;
 		}
-		__this.q = __this.q + prop + ' = ' + param[prop] + ' ';
+		__this.q = __this.q + key + ' = ' + F.def(obj[key]) + ' ';
 		return __this;
 	}
 	
@@ -94,8 +95,12 @@ const query = function(){
 		return __this.q;
 	}
 	
-	this.raw = function(param){
-		__this.q = __this.q + param + ' ';
+	this.done = function(){
+		return __this.q;
+	}
+	
+	this.raw = function(string){
+		__this.q = __this.q + string + ' ';
 		return __this;
 	}
 	

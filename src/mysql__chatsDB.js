@@ -12,10 +12,14 @@ const chatsDB = {};
 
 //найти чаты в которых у пользователя есть роль
 chatsDB.selectChatsByUser = function (q, callback) {
-	let userId = F.def(q.userId); 
 	
-	//let query = `SELECT * FROM ${db.chatsRooms} WHERE usersId = ${userId}`;
-	let query = Q().SELECT('*').FROM(db.chatsRooms).WHERE().even({usersId : userId}).end();
+	let query = Q()
+	.SELECT('*')
+	.FROM(db.chatsRooms)
+	.WHERE()
+	.even({
+		usersId : q.userId
+	}).end();
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
@@ -28,11 +32,14 @@ chatsDB.selectChatsByUser = function (q, callback) {
 
 //все роли по id чата
 chatsDB.selectChatsRoomsById = function (q, callback){
-	let chatsId = q.chatsId; // [1,2,3] — id
-	let idStr = F.arrayToString(chatsId); // "1","2","3"
 	
-	//let query = `SELECT * FROM ${db.chatsRooms} WHERE chatsId IN (${idStr});`;
-	let query = Q().SELECT('*').FROM(db.chatsRooms).WHERE().IN({chatsId : idStr}).end();
+	let query = Q()
+	.SELECT('*')
+	.FROM(db.chatsRooms)
+	.WHERE()
+	.IN({
+		chatsId : q.chatsId
+	}).end();
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
@@ -45,11 +52,19 @@ chatsDB.selectChatsRoomsById = function (q, callback){
 
 //загрузить чаты по Id
 chatsDB.selectChatsById = function (q, callback) {
-	let chatsId = q.chatsId; // [1,2,3] — id
-	let idStr = F.arrayToString(chatsId); // "1","2","3"
 	
-	//let query = `SELECT * FROM ${db.chats} WHERE id IN (${idStr}) AND isDeleted = 0`;
-	let query = Q().SELECT('*').FROM(db.chats).WHERE().IN({id : idStr}).AND().even({isDeleted : '0'}).end(); 
+	let query = Q()
+	.SELECT('*')
+	.FROM(db.chats)
+	.WHERE()
+	.IN({
+		id : q.chatsId
+	}).AND()
+	.even({
+		isDeleted : '0'
+	}).end(); 
+	
+	console.log('!!!!!', query)
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
@@ -62,11 +77,14 @@ chatsDB.selectChatsById = function (q, callback) {
 
 //найти все теги к чатам по Id
 chatsDB.selectChatTagsById = function (q, callback) {
-	let chatsId = q.chatsId; // [1,2,3] — id
-	let idStr = F.arrayToString(chatsId); // "1","2","3"
 	
-	//let query = `SELECT * FROM ${db.chatsTags} WHERE chatsId IN (${chatsId})`;
-	query = Q().SELECT('*').FROM(db.chatsTags).WHERE().IN({chatsId: chatsId}).end();
+	let query = Q()
+	.SELECT('*')
+	.FROM(db.chatsTags)
+	.WHERE()
+	.IN({
+		chatsId: q.chatsId
+	}).end();
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
@@ -79,25 +97,18 @@ chatsDB.selectChatTagsById = function (q, callback) {
 
 // создать чат
 chatsDB.insertNewChat = function (q, callback) {
-	let createrId = F.def(q.userId);
-	let name = F.def(q.name);
-	let icon = F.def(q.icon);
-	let spacesId = F.def(q.spacesId);
-	let creationDate = F.def(q.creationDate);
-	let taskStatus = F.def(q.taskStatus);
-	let parentId = F.def(q.parentId);
-	let deadlineDate = F.def(q.deadlineDate);
 
-	//let query = `INSERT INTO ${db.chats} (name, icon, createrId, spacesId, creationDate, taskStatus, parentId, deadlineDate) VALUES (${name}, ${icon}, ${createrId}, ${spacesId}, ${creationDate}, ${taskStatus}, ${parentId}, ${deadlineDate});`;
-	let query = Q().INSERT(db.chats).VALUES({
-		name : name,
-		icon : icon,
-		createrId : createrId,
-		spacesId : spacesId,
-		creationDate : creationDate,
-		taskStatus : taskStatus,
-		parentId : parentId,
-		deadlineDate : deadlineDate
+	let query = Q()
+	.INSERT(db.chats)
+	.VALUES({
+		name : q.name,
+		icon : q.icon,
+		createrId : q.userId,
+		spacesId : q.spacesId,
+		creationDate : q.creationDate,
+		taskStatus : q.taskStatus,
+		parentId : q.parentId,
+		deadlineDate : q.deadlineDate
 	}).end();
 	
 	F.connectToMYSQL(query, function (e) {
@@ -111,18 +122,16 @@ chatsDB.insertNewChat = function (q, callback) {
 
 //добавить пользователя в чат
 chatsDB.insertUserInToChat = function(q, callback) {
-	let chatsId = F.def(q.chatsId);
-	let usersId = F.def(q.usersId);
-	let chatRole = F.def(q.chatRole);
-	let joinDate = F.def(q.joinDate);
 	
-	//let query = `INSERT INTO ${db.chatsRooms} (chatsId, usersId, chatRole, joinDate) VALUES ( ${chatsId}, ${usersId}, ${chatRole}, ${joinDate} );`;
-	let query = Q().INSERT(db.chatsRooms).VALUES({
-		chatsId : chatsId,
-		usersId : usersId,
-		chatRole : chatRole,
-		joinDate : joinDate
+	let query = Q()
+	.INSERT(db.chatsRooms)
+	.VALUES({
+		chatsId : q.chatsId,
+		usersId : q.usersId,
+		chatRole : q.chatRole,
+		joinDate : q.joinDate
 	}).end();
+	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
 			status: (e.affectedRows) ? true : false,	

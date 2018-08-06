@@ -17,16 +17,20 @@ usersDB.selectUser = function (q, callback) {
 	let pass = q.pass 	|| null;
 	let login = q.login || null;
 	let id = q.userId 	|| null;
-		
+	
 	let queryValues = F.queryValueToString([
-		(id) 		? `id = "${id}"` 				 : ``,
-		(email)	? `email = "${email}"` 	 : ``,
-		(pass) 	? `password = "${pass}"` : ``,
-		(login) ? `login = "${login}"` 	 : ``
+		(id) 		? Q().even({id : id}).done() 				 : ``,
+		(email)	? Q().even({email : email}).done() 	 : ``,
+		(pass) 	? Q().even({password : pass}).done() : ``,
+		(login) ? Q().even({login : login}).done() 	 : ``
 	]);
 	
-	//let query = `SELECT * FROM ${db.users} WHERE ${queryValues};`;
-	let query = Q().SELECT('*').FROM(db.users).WHERE().raw(queryValues).end(); 
+	let query = Q()
+	.SELECT('*')
+	.FROM(db.users)
+	.WHERE()
+	.raw(queryValues)
+	.end(); 
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
@@ -39,11 +43,13 @@ usersDB.selectUser = function (q, callback) {
 
 //найти всех пользователей по id
 usersDB.selectUsersById = function (q, callback) {
-	let userList = q.userList;
-	let idStr = F.arrayToString(userList);
 	
-	//let query = `SELECT * FROM ${db.users} WHERE id IN (${idStr})`;
-	let query = Q().SELECT('*').FROM(db.users).WHERE().IN({id : idStr}).end();
+	let query = Q()
+	.SELECT('*')
+	.FROM(db.users)
+	.WHERE()
+	.IN({id : q.userList})
+	.end();
 	
 	F.connectToMYSQL(query, function (e) {
 		
@@ -63,11 +69,15 @@ usersDB.selectUsersById = function (q, callback) {
 
 //задать активный чат для пользователя
 usersDB.updateActiveChat = function (q, callback) {
-	let userId = F.def(q.userId);
-	let chatId = F.def(q.chatId);
 	
-	//let query = `UPDATE ${db.users} SET activeChatId = ${chatId} WHERE id = ${userId}`;
-	let query = Q().UPDATE(db.users).SET({activeChatId : chatId}).WHERE().even({id : userId});
+	let query = Q()
+	.UPDATE(db.users)
+	.SET({
+		activeChatId : q.chatId
+	}).WHERE()
+	.even({
+		id : q.userId
+	}).end();
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
@@ -79,17 +89,14 @@ usersDB.updateActiveChat = function (q, callback) {
 
 //создать новового пользователя
 usersDB.insertNewUser = function (q, callback) {
-	let login = F.def(q.login);
-	let email = F.def(q.email);
-	let pass = F.def(q.pass);
-	let date = F.def(dateTime().formated);
 	
-	//let query = `INSERT INTO ${db.users} (login,email,password,registerDate) VALUES (${login}, ${email}, ${pass}, ${date});`;
-	let query = Q().INSERT(db.users).VALUES({
-		login : login,
-		email : email,
-		password : pass,
-		registerDate : date
+	let query = Q()
+	.INSERT(db.users)
+	.VALUES({
+		login : q.login,
+		email : q.email,
+		password : q.pass,
+		registerDate : dateTime().formated
 	}).end();
 	
 	F.connectToMYSQL(query, function (e) {
@@ -103,10 +110,15 @@ usersDB.insertNewUser = function (q, callback) {
 
 //Загрузить настройки пользователя по id
 usersDB.selectSettingsById = function (q, callback) {
-	let id = q.id;
 	
-	//let query = `SELECT * FROM ${db.users} WHERE id = "${id}";`;
-	let query = Q().SELECT('*').FROM(db.users).WHERE().even({id : id}).end();
+	let query = Q()
+	.SELECT('*')
+	.FROM(db.users)
+	.WHERE()
+	.even({
+		id : q.id
+	}).end();
+	
 	F.connectToMYSQL(query, function (e) {
 		let user = e[0];
 		let result = {
