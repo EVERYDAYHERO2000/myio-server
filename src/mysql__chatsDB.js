@@ -93,8 +93,8 @@ chatsDB.updateChatsRoomsPinByUserId = function (q, callback){
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
-			status: F.status(e.length),
-			msg: F.msg(e.length,[`Пин изменен на ${q.isPinned}`,`Пин не изменен`]),
+			status: F.status(e.affectedRows),
+			msg: F.msg(e.affectedRows,[`Пин изменен на ${q.isPinned}`,`Пин не изменен`]),
 			data : e
 		});
 	});
