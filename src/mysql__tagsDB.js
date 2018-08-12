@@ -23,9 +23,9 @@ tagsDB.selectTagsBySpaceId = function(q, callback){
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
-			status: (e.affectedRows) ? true : false,	
-			msg: (e.affectedRows) ? `Загружено ${e.length} тегов` : 'Теги не загружены',
-			tags: e
+			status: F.status(e.affectedRows),	
+			msg: F.msg(e.affectedRows,[`Загружено ${e.length} тегов`,'Теги не загружены']),
+			data: e
 		});
 	});
 	

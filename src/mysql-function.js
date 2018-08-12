@@ -62,4 +62,16 @@ func.collectArray = function (arr, key){
 	return userList;
 }
 
+//возвращает true/falce в зависимости от проверяемого arguments
+func.status = function(argument, callback){
+	let s = (argument) ? true : false;
+	if (callback) callback(s);
+	return s;
+}
+
+//возвращает одно из сообщений из массива messages в зависимости от результата проверки arguments
+func.msg = function(argument, messages){
+	if (messages.length) return func.status(argument) ? messages[0] : messages[1];
+}
+
 module.exports = func;

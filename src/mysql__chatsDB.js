@@ -18,14 +18,14 @@ chatsDB.selectChatsByUser = function (q, callback) {
 	.FROM(db.chatsRooms)
 	.WHERE()
 	.even({
-		usersId : q.userId
+		usersId : q.usersId
 	}).end();
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
-			status: (e.length) ? true : false,
-			msg: (e.length) ? `Найдено ${e.length} чатов` : `Не найдено чатов`,
-			chatsRooms : e
+			status: F.status(e.length),
+			msg: F.msg(e.length, [`Найдено ${e.length} чатов`,`Не найдено чатов`]),
+			data : e
 		});
 	});
 }
@@ -43,9 +43,59 @@ chatsDB.selectChatsRoomsById = function (q, callback){
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
-			status: (e.length) ? true : false,
-			msg: (e.length) ? `Найдено ${e.length} чатов` : `Не найдено чатов`,
-			chatsRooms : e
+			status: F.status(e.length),
+			msg: F.msg(e.length,[`Найдено ${e.length} чатов`,`Не найдено чатов`]),
+			data : e
+		});
+	});
+}
+
+//найти роль в чате по id пользователя и id чата
+chatsDB.selectChatsRoomsByChatAndUserId = function (q, callback){
+	
+	let query = Q()
+	.SELECT('*')
+	.FROM(db.chatsRooms)
+	.WHERE()
+	.even({
+		chatsId : q.chatsId
+	})
+	.AND()
+	.even({
+		usersId : q.usersId
+	}).end();
+	
+	F.connectToMYSQL(query, function (e) {
+		if (callback) callback({
+			status: F.status(e.length),
+			msg: F.msg(e.length,[`Найдено ${e.length} чатов`,`Не найдено чатов`]),
+			data : e
+		});
+	});
+}
+
+//запинить/разпинить чат
+chatsDB.updateChatsRoomsPinByUserId = function (q, callback){
+	
+	let query = Q()
+	.UPDATE(db.chatsRooms)
+	.SET({
+		isPinned : q.isPinned
+	})
+	.WHERE()
+	.even({
+		chatsId : q.chatId
+	})
+	.AND()
+	.even({
+		usersId : q.userId
+	}).end();
+	
+	F.connectToMYSQL(query, function (e) {
+		if (callback) callback({
+			status: F.status(e.length),
+			msg: F.msg(e.length,[`Пин изменен на ${q.isPinned}`,`Пин не изменен`]),
+			data : e
 		});
 	});
 }
@@ -58,19 +108,18 @@ chatsDB.selectChatsById = function (q, callback) {
 	.FROM(db.chats)
 	.WHERE()
 	.IN({
-		id : q.chatsId
-	}).AND()
+		id : q.id
+	})
+	.AND()
 	.even({
 		isDeleted : '0'
 	}).end(); 
 	
-	console.log('!!!!!', query)
-	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
-			status: (e.length) ? true : false,
-			msg: (e.length) ? `Найдено ${e.length} чатов` : 'Не найдено чатов',
-			chats : e
+			status: F.status(e.length),
+			msg: F.msg(e.length, [`Найдено ${e.length} чатов` , 'Не найдено чатов']),
+			data : e
 		});
 	});
 }
@@ -88,9 +137,9 @@ chatsDB.selectChatTagsById = function (q, callback) {
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
-			status: (e.length) ? true : false,
-			msg: (e.length) ? `Найдено ${e.length} чатов` : 'Не найдено чатов',
-			chatsTags : e
+			status: F.status(e.length),
+			msg: F.msg(e.length, [`Найдено ${e.length} чатов`,'Не найдено чатов']),
+			data : e
 		});
 	});
 }
@@ -113,9 +162,9 @@ chatsDB.insertNewChat = function (q, callback) {
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
-			status: (e.affectedRows) ? true : false,	
-			msg: (e.affectedRows) ? 'Чат добавлен' : 'Чат не добавлен',
-			id: e.insertId
+			status: F.status(e.affectedRows),	
+			msg: F.msg(e.affectedRows, ['Чат добавлен','Чат не добавлен']),
+			data: e
 		});
 	});
 }
@@ -134,8 +183,9 @@ chatsDB.insertUserInToChat = function(q, callback) {
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
-			status: (e.affectedRows) ? true : false,	
-			msg: (e.affectedRows) ? 'Пользователь добавлен в чат' : 'Пользователь не добавлен в чат'
+			status: F.status(e.affectedRows),	
+			msg: F.msg(e.affectedRows, ['Пользователь добавлен в чат','Пользователь не добавлен в чат']),
+			data: e
 		});
 	});
 }

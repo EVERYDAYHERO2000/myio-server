@@ -34,9 +34,9 @@ usersDB.selectUser = function (q, callback) {
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
-			status: (e.length) ? true : false,
-			msg: (e.length) ? `Пользователь ${email} найден` : `Пользователь ${email} не найден`,
-			user: e[0]
+			status: F.status(e.length),
+			msg: F.msg(e.length,[`Пользователь ${email} найден`,`Пользователь ${email} не найден`]),
+			data: e[0]
 		});
 	});
 }
@@ -60,9 +60,9 @@ usersDB.selectUsersById = function (q, callback) {
 		}
 		
 		if (callback) callback({
-			status: (e.affectedRows) ? true : false,	
-			msg: (e.affectedRows) ? 'Пользователь найден' : 'Пользователь не найден',
-			users: e
+			status: F.status(e.affectedRows),	
+			msg: F.msg(e.affectedRows,['Пользователь найден','Пользователь не найден']),
+			data: e
 		});
 	});
 }
@@ -81,8 +81,9 @@ usersDB.updateActiveChat = function (q, callback) {
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
-			status: (e.affectedRows) ? true : false,
-			msg: (e.affectedRows) ? 'Данные изменены' : ''
+			status: F.status(e.affectedRows),
+			msg: F.msg(e.affectedRows,['Данные изменены','']),
+			data: e
 		});
 	});
 }
@@ -101,41 +102,12 @@ usersDB.insertNewUser = function (q, callback) {
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
-			status: (e.affectedRows) ? true : false,
-			msg: (e.affectedRows) ? `Пользователь ${email} добавлен` : `Пользователь ${email} не добавлен`,
-			id: e.insertId
+			status: F.status(e.affectedRows),
+			msg: F.msg(e.affectedRows,[`Пользователь ${email} добавлен`,`Пользователь ${email} не добавлен`]),
+			data: e
 		});
 	});
 };
-
-//Загрузить настройки пользователя по id
-usersDB.selectSettingsById = function (q, callback) {
-	
-	let query = Q()
-	.SELECT('*')
-	.FROM(db.users)
-	.WHERE()
-	.even({
-		id : q.id
-	}).end();
-	
-	F.connectToMYSQL(query, function (e) {
-		let user = e[0];
-		let result = {
-			status: (e.length) ? true : false,
-			msg: (e.length) ? `Данные пользователя id: ${id} загружены` : `Пользователь id: ${id} не найден`
-		};
-		if (result.status) {
-			result.login = user.login,
-			result.email = user.password,
-			result.avatar = user.avatar,
-			result.firstName = user.firstName,
-			result.lastName = user.lastName,
-			result.lang = user.lang
-		};
-		if (callback) callback(result);
-	});
-}
 
 
 module.exports = usersDB;

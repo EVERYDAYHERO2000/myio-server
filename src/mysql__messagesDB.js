@@ -11,8 +11,8 @@ const db = C.db;
 // сообщения
 const messagesDB = {};
 
-//загрузить сообщения
-messagesDB.selectMessages = function(q, callback){
+//загрузить сообщения по id чатов
+messagesDB.selectMessagesByChatId = function(q, callback){
 	
 	let query = Q()
 	.SELECT('*')
@@ -24,9 +24,9 @@ messagesDB.selectMessages = function(q, callback){
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
-			status: (e.affectedRows) ? true : false,	
-			msg: (e.affectedRows) ? `Загружено ${e.length} сообщений` : 'Сообщения не загружены',
-			messages: e
+			status: F.status(e.affectedRows),	
+			msg: F.msg(e.affectedRows,[`Загружено ${e.length} сообщений`,'Сообщения не загружены']),
+			data: e
 		});
 	});
 }

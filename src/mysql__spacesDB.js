@@ -24,9 +24,9 @@ spacesDB.insertNewSpace = function (q, callback) {
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
-			status: (e.affectedRows) ? true : false,
-			msg: (e.affectedRows) ? `Пространство "${space}" добавленно` : 'Пространство не добавлено',
-			id: e.insertId
+			status: F.status(e.affectedRows),
+			msg: F.msg(e.affectedRows,[`Пространство "${space}" добавленно`,'Пространство не добавлено']),
+			data: e
 		});
 	});
 }
@@ -44,8 +44,9 @@ spacesDB.insertRoleInToSpace = function (q, callback) {
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
-			status: (e.affectedRows) ? true : false,
-			msg: (e.affectedRows) ? `Роль пользователя id=${userId} для пространства добавлена` : 'Роль для пространства не добавлена'
+			status: F.status(e.affectedRows),
+			msg: F.msg(e.affectedRows,[`Роль пользователя id=${userId} для пространства добавлена`,'Роль для пространства не добавлена']),
+			data: e
 		});
 	});
 }
@@ -63,9 +64,9 @@ spacesDB.selectSpacesByUserId = function(q, callback) {
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
-			status: (e.length) ? true : false,
-			msg: (e.length) ? `У пользователя есть роли в ${e.length} пространствах` : 'У пользователя нет ролей в пространствах',
-			spaces : e
+			status: F.status(e.length),
+			msg: F.msg(e.length,[`У пользователя есть роли в ${e.length} пространствах`,'У пользователя нет ролей в пространствах']),
+			data : e
 		});
 	});
 }
@@ -83,9 +84,9 @@ spacesDB.selectSpacesById = function(q, callback) {
 	
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
-			status: (e.length) ? true : false,
-			msg: (e.length) ? `Загружено ${e.length} пространств` : `Не загруженно пространств`,
-			spaces : e
+			status: F.status(e.length),
+			msg: F.msg(e.length,[`Загружено ${e.length} пространств`,`Не загруженно пространств`]),
+			data : e
 		});
 	});
 }
