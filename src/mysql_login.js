@@ -89,7 +89,8 @@ const login = function(q, callback) {
 												chatsRooms: selectChatsByUser__result.data,
 												chats: selectChatsById__result.data,
 												tags: selectTagsBySpaceId__result.data,
-												userList: selectUsersById__result.data
+												userList: selectUsersById__result.data,
+												messages: []
 											}
 										});
 									});

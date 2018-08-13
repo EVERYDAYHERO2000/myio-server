@@ -7,6 +7,7 @@ const usersDB = require('../src/mysql__usersDB');
 const login = require('../src/mysql_login');
 const registration = require('../src/mysql_registration');
 const createNewChat = require('../src/mysql_create-new-chat');
+const newMessage = require('../src/mysql_new-message');
 
 const mysqlQuery = function (e, q, callback) {
 	switch (e) {
@@ -70,6 +71,16 @@ const mysqlQuery = function (e, q, callback) {
 				email: q.email,
 				pass: q.pass,
 				chatsId: (typeof q.chatsId == 'string') ? q.chatsId.split(',') : q.chatsId
+			}, callback);
+			break;
+			
+		case 'newMessage':
+			newMessage({
+				email: q.email,
+				pass: q.pass,
+				text : q.text,
+				userId: q.userId,
+				chatsId: q.chatsId,
 			}, callback);
 			break;
 	}
