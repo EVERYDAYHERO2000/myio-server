@@ -11,7 +11,8 @@ const db = C.db;
 //таблица пользователей
 const usersDB = {};
 
-//Найти пользователя 
+//Найти пользователя (проверить существует ли пользователь)
+//возвращает всё о пользователе
 usersDB.selectUser = function (q, callback) {
 	let email = q.email || null;
 	let pass = q.pass 	|| null;

@@ -8,6 +8,8 @@ const login = require('../src/mysql_login');
 const registration = require('../src/mysql_registration');
 const createNewChat = require('../src/mysql_create-new-chat');
 const newMessage = require('../src/mysql_new-message');
+const findUser = require('../src/mysql_find-user');
+const addUser = require('../src/mysql_add-user');
 
 const mysqlQuery = function (e, q, callback) {
 	switch (e) {
@@ -82,6 +84,20 @@ const mysqlQuery = function (e, q, callback) {
 				userId: q.userId,
 				chatsId: q.chatsId,
 			}, callback);
+			break;
+			
+		case 'findUser':
+			findUser({
+				email: q.email
+			},callback);
+			break;
+			
+		case 'addUser':
+			addUser({
+				userId: q.userId,
+				chatId: q.chatId,
+				cpaceId: q.spaceId
+			},callback);
 			break;
 	}
 }
