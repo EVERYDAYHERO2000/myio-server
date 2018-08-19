@@ -95,8 +95,7 @@ const mysqlQuery = function (e, q, callback) {
 		case 'addUser':
 			addUser({
 				userId: q.userId,
-				chatId: q.chatId,
-				cpaceId: q.spaceId
+				spaceId: q.spaceId
 			},callback);
 			break;
 	}

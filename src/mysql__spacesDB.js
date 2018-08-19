@@ -45,7 +45,7 @@ spacesDB.insertRoleInToSpace = function (q, callback) {
 	F.connectToMYSQL(query, function (e) {
 		if (callback) callback({
 			status: F.status(e.affectedRows),
-			msg: F.msg(e.affectedRows,[`Роль пользователя id=${userId} для пространства добавлена`,'Роль для пространства не добавлена']),
+			msg: F.msg(e.affectedRows,[`Роль пользователя id=${q.userId} для пространства добавлена`,'Роль для пространства не добавлена']),
 			data: e
 		});
 	});
@@ -59,7 +59,7 @@ spacesDB.selectSpacesByUserId = function(q, callback) {
 	.FROM(db.spacesRole)
 	.WHERE()
 	.even({
-		userId : q.useId
+		userId : q.userId
 	}).end();
 	
 	F.connectToMYSQL(query, function (e) {
@@ -70,6 +70,27 @@ spacesDB.selectSpacesByUserId = function(q, callback) {
 		});
 	});
 }
+
+//найти всех пользователей у которых есть роль в пространстве
+spacesDB.selectAllUserBySpaceId = function(q, callback) {
+	
+	let query = Q()
+	.SELECT('*')
+	.FROM(db.spacesRole)
+	.WHERE()
+	.IN({
+		spaceId : q.spaces
+	}).end();
+	
+	F.connectToMYSQL(query, function (e) {
+		if (callback) callback({
+			status: F.status(e.length),
+			msg: F.msg(e.length,[`У пространства ${e.length} пользователей`,'У пространства нет пользователей']),
+			data : e
+		});
+	});
+}
+
 
 //загрузить все пространства пользователя
 spacesDB.selectSpacesById = function(q, callback) {

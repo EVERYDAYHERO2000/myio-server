@@ -46,6 +46,20 @@ func.cleanArray = function (actual) {
   return newArray;
 }
 
+//
+//оставляет только уникальные значения в массиве
+func.unique = function(array) {
+    var a = array.concat();
+    for(var i=0; i<a.length; ++i) {
+        for(var j=i+1; j<a.length; ++j) {
+            if(a[i] === a[j])
+                a.splice(j--, 1);
+        }
+    }
+
+    return a;
+};
+
 //mysql AND массив в строку
 //["1","2","3"] => "1" AND "2" AND "3"
 func.queryValueToString = function (arr){
