@@ -87,9 +87,15 @@ const mysqlQuery = function (e, q, callback) {
 			break;
 			
 		case 'findUser':
-			findUser({
-				email: q.email
-			},callback);
+				findUser({
+					email: q.email
+				},callback);
+			break;	
+			
+		case 'loadUser':
+			usersDB.selectUsersById({
+				userList: [q.id]
+			}, callback);
 			break;
 			
 		case 'addUser':

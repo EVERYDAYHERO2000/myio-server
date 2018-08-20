@@ -61,8 +61,8 @@ usersDB.selectUsersById = function (q, callback) {
 		}
 		
 		if (callback) callback({
-			status: F.status(e.affectedRows),	
-			msg: F.msg(e.affectedRows,['Пользователь найден','Пользователь не найден']),
+			status: F.status(e.length),	
+			msg: F.msg(e.length,['Пользователь найден','Пользователь не найден']),
 			data: e
 		});
 	});
